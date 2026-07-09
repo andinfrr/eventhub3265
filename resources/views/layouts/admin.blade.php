@@ -168,7 +168,10 @@
 
     </aside>
 
-    @yield('content')
+    <main class="flex-1 p-2">
+        @yield('content')
+    </main>
+
 
 </body>
 

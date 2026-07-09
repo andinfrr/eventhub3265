@@ -55,6 +55,10 @@ Route::post('/checkout/{event}',
     [CheckoutController::class, 'store'])
     ->name('checkout.store');
 
+
+    // WEBHOK
+Route::post('/midtrans/callback', [\App\Http\Controllers\MidtransWebhookController::class, 'handle']);
+
 /*
 |--------------------------------------------------------------------------
 | ADMIN ROUTE
@@ -105,5 +109,3 @@ Route::get('/payment/{order_id}', [\App\Http\Controllers\CheckoutController::cla
 
 Route::get('/success/{order_id}', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
 
-// WEBHOK
-Route::post('/midtrans/callback', [\App\Http\Controllers\MidtransWebhookController::class, 'handle']);

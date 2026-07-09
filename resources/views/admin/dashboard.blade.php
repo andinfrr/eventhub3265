@@ -4,8 +4,46 @@
 
      @section('content')
      <!-- Stats Grid -->
-     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-         <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+     
+
+     <!-- Latest Sales Table -->
+     <div class="w-full bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+
+     <div class="mb-6">
+
+    <div class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-8 text-white shadow-lg">
+
+        <div class="flex justify-between items-center">
+
+            <div>
+
+                <p class="uppercase text-sm tracking-widest text-indigo-200 ">
+                    Total Pendapatan
+                </p>
+
+                <h1 class="text-5xl font-black mt-2">
+                    Rp {{ number_format($totalRevenue,0,',','.') }}
+                </h1>
+
+                <p class="mt-3 text-indigo-100">
+                    Total pemasukan dari seluruh transaksi yang berhasil.
+                </p>
+
+            </div>
+
+            <div class="w-24 h-24 rounded-3xl bg-white/20 flex items-center justify-center">
+
+                <!-- icon -->
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+    <div class="mt-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+         <!-- <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
              <div class="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4">
                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -15,7 +53,8 @@
              </div>
              <p class="text-slate-400 text-sm font-bold uppercase mb-1">Total Pendapatan</p>
              <h3 class="text-2xl font-black">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</h3>
-         </div>
+         </div> -->
+
          <div class="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
              <div class="w-12 h-12 bg-green-50 text-green-600 rounded-2xl flex items-center justify-center mb-4">
                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,8 +88,6 @@
          </div>
      </div>
 
-     <!-- Latest Sales Table -->
-     <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
          <div class="p-8 border-b flex justify-between items-center">
              <h3 class="font-black text-xl">Transaksi Terakhir</h3>
              <a href="{{ route('transactions.index') }}" class="text-indigo-600 font-bold hover:underline">Lihat Semua</a>
@@ -95,4 +132,5 @@
              </table>
          </div>
      </div>
+     
      @endsection
