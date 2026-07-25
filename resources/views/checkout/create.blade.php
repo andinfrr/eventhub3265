@@ -52,24 +52,33 @@
 
          <!-- Form Card -->
          <div class="bg-white rounded-3xl border border-slate-200 p-8 shadow-sm">
-             <h3 class="text-xl font-bold mb-6 italic text-indigo-600 underline underline-offset-8">📦 Data Pemesan
-                 (Tanpa Login)</h3>
+             <h3 class="text-xl font-bold mb-6 italic text-indigo-600 underline underline-offset-8">
+                📦 Informasi Pemesan
+                </h3>
              <form action="{{ route('checkout.store', $event->id) }}" method="POST" class="space-y-6">
                  @csrf
                  <div>
                      <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Nama
                          Lengkap</label>
-                     <input type="text" name="customer_name" placeholder="Masukkan nama sesuai identitas"
-                         class="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition font-medium"
-                         required value="{{ old('customer_name') }}">
-                 </div>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                     <div>
-                         <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Email
-                             Aktif</label>
-                         <input type="email" name="customer_email" placeholder="contoh@gmail.com"
-                             class="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition font-medium"
-                             required value="{{ old('customer_email') }}">
+                     <input
+                        type="text"
+                        name="customer_name"
+                        placeholder="Masukkan nama sesuai identitas"
+                        class="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition font-medium"
+                        required
+                        value="{{ old('customer_name', $user->name ?? '') }}">
+                                     </div>
+                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                         <div>
+                                             <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Email
+                                                 Aktif</label>
+                    <input
+                        type="email"
+                        name="customer_email"
+                        placeholder="contoh@gmail.com"
+                        class="w-full px-5 py-4 bg-white border-2 border-slate-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-600 outline-none transition font-medium"
+                        required
+                        value="{{ old('customer_email', $user->email ?? '') }}">
                          <p class="text-[10px] text-slate-400 mt-2 font-bold uppercase tracking-tighter">*E-Ticket
                              akan dikirim ke email ini</p>
                      </div>
@@ -82,16 +91,64 @@
                      </div>
                  </div>
 
-                 <button type="submit" href="{{ route('events.show', $event->id) }}"
-                     class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-xl shadow-xl shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all">
-                     Lanjut Pembayaran
-                 </button>
+@auth
+<button type="submit"
+    class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold">
+    Lanjut Pembayaran
+</button>
+@endauth
+
+@guest
+<button type="button"
+    onclick="showLoginModal()"
+    class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold">
+    Lanjut Pembayaran
+</button>
+@endguest
 
                  <p class="text-center text-xs text-slate-400">Dengan menekan tombol di atas, Anda menyetujui Syarat
                      & Ketentuan kami.</p>
              </form>
+             <div id="loginModal"
+    class="fixed inset-0 bg-black/50 hidden justify-center items-center z-50">
+
+    <div class="bg-white rounded-3xl p-8 w-[400px] text-center">
+
+        <h2 class="text-2xl font-bold mb-3">
+            Login Diperlukan
+        </h2>
+
+        <p class="text-gray-500 mb-6">
+            Untuk melanjutkan pembayaran, silakan login menggunakan akun Google.
+        </p>
+
+        <a href="{{ route('google.login', ['redirect' => url()->current()]) }}"
+            class="block bg-indigo-600 text-white py-4 rounded-xl font-bold">
+            Login dengan Google
+        </a>
+
+        <button type="button"
+            onclick="closeLoginModal()"
+            class="mt-3 text-gray-500">
+            Batal
+        </button>
+
+    </div>
+
+</div>
          </div>
 
      </div>
  </main>
+ <script>
+function showLoginModal(){
+    document.getElementById('loginModal').classList.remove('hidden');
+    document.getElementById('loginModal').classList.add('flex');
+}
+
+function closeLoginModal(){
+    document.getElementById('loginModal').classList.remove('flex');
+    document.getElementById('loginModal').classList.add('hidden');
+}
+</script>
  @endsection

@@ -17,22 +17,22 @@ use App\Http\Controllers\CheckoutController;
 
 
 Route::get('/login', function () {
-    return redirect()->route('admin.login');
+    return redirect('/admin/login');
 })->name('login');
+
 // Grouping untuk URL berawalan /admin
 Route::prefix('admin')->name('admin.')->group(function () {
-    // Rute Login bebas akses
-    Route::get('login', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('login', [AuthController::class, 'login'])->name('login.post');
-    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Mengamankan Route Administrasi di balik tembok (Middleware)
-    Route::middleware(['auth', 'admin'])->group(function () {
-        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
-        Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
-    });
+    Route::get('login', [AuthController::class, 'showLogin'])
+        ->name('login');
+
+    Route::post('login', [AuthController::class, 'login'])
+        ->name('login.post');
+
+    Route::post('logout', [AuthController::class, 'logout'])
+        ->name('logout');
+
 });
-
 /*
 |--------------------------------------------------------------------------
 | PUBLIC ROUTE
@@ -50,12 +50,18 @@ Route::get('/checkout', [EventController::class, 'checkout'])->name('checkout');
 
 Route::get('/ticket', [TicketController::class, 'ticket'])->name('ticket');
 
-Route::get('/checkout/{event}',
-    [CheckoutController::class, 'create'])
+// Route::get('/checkout/{event}',
+//     [CheckoutController::class, 'create'])
+//     ->name('checkout.create');
+
+// Route::post('/checkout/{event}',
+//     [CheckoutController::class, 'store'])
+//     ->name('checkout.store');
+
+Route::get('/checkout/{event}', [CheckoutController::class, 'create'])
     ->name('checkout.create');
 
-Route::post('/checkout/{event}',
-    [CheckoutController::class, 'store'])
+Route::post('/checkout/{event}', [CheckoutController::class, 'store'])
     ->name('checkout.store');
 
 
@@ -116,3 +122,14 @@ Route::prefix('admin')
 Route::get('/payment/{order_id}', [\App\Http\Controllers\CheckoutController::class, 'payment'])->name('checkout.payment');
 
 Route::get('/success/{order_id}', [\App\Http\Controllers\CheckoutController::class, 'success'])->name('checkout.success');
+
+// LOGINSOCIALTE
+Route::get('/auth/google', [AuthController::class, 'redirectGoogle'])
+    ->name('google.login');
+
+Route::get('/auth/google/callback', [AuthController::class, 'googleCallback'])
+    ->name('google.callback');
+
+    Route::post('/logout', [AuthController::class, 'logout'])
+    ->name('logout');
+    

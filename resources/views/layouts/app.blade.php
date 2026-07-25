@@ -25,12 +25,37 @@
     <!-- Navigation -->
     <nav
         class="glass sticky top-8 z-40 mx-4 mt-4 px-6 py-4 rounded-2xl border border-white/20 shadow-lg flex justify-between items-center">
-        <div class="flex items-center gap-2">
-            <div
-                class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-                AH</div>
-            <span class="text-xl font-bold tracking-tight">AmikomEventHub</span>
-        </div>
+@php
+    if(auth()->check()){
+        $words = explode(' ', auth()->user()->name);
+
+        if(count($words) >= 2){
+            $initial = strtoupper(substr($words[0],0,1).substr($words[1],0,1));
+        }else{
+            $initial = strtoupper(substr($words[0],0,2));
+        }
+    }
+@endphp
+
+<div class="flex items-center gap-3">
+
+    <div class="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold text-lg">
+        {{ auth()->check() ? $initial : 'AH' }}
+    </div>
+
+    <div>
+        @auth
+            <p class="font-bold text-lg">
+                {{ auth()->user()->name }}
+            </p>
+        @else
+            <p class="font-bold text-2xl">
+                AmikomEventHub
+            </p>
+        @endauth
+    </div>
+
+</div>
         <div class="hidden md:flex gap-8 font-medium">
             <a href="#" class="text-indigo-600">Jelajahi</a>
             <a href="#" class="hover:text-indigo-600 transition">Kategori</a>
@@ -41,6 +66,14 @@
             <button
                 class="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition">Daftar</button>
         </div> -->
+        @if(Auth::check())
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit">
+                Logout
+            </button>
+        </form>
+        @endif
     </nav>
 	
 	@yield('content')

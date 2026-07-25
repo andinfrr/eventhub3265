@@ -11,11 +11,18 @@ use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
+
     public function create(Event $event)
     {
         $categories = Category::all();
-
-        return view('checkout.create', compact('event', 'categories'));
+    
+        $user = auth()->user();
+    
+        return view('checkout.create', compact(
+            'event',
+            'categories',
+            'user'
+        ));
     }
 
     public function store(Request $request, Event $event)
