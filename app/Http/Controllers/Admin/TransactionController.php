@@ -10,7 +10,8 @@ class TransactionController extends Controller
 {
   public function index(Request $request)
 {
-    $query = Transaction::with('event');
+    $query = Transaction::with('event')
+    ->where('organization_id', auth()->user()->organization_id);
 
     // SEARCH
     if ($request->search) {

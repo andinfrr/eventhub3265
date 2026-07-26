@@ -15,7 +15,7 @@ class AdminMiddleware
             return redirect()->route('admin.login');
         }
 
-        if (Auth::user()->role !== 'admin') {
+        if (!in_array(Auth::user()->role, ['admin', 'superadmin'])) {
             abort(403, 'Akses ditolak');
         }
 

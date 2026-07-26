@@ -61,6 +61,30 @@
         </td>
 
         <td class="px-8 py-6">
+
+        @if($event->status == 'pending')
+
+            <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-xl text-xs font-bold">
+                Pending
+            </span>
+
+        @elseif($event->status == 'approved')
+
+            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-xl text-xs font-bold">
+                Approved
+            </span>
+
+        @else
+
+            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-xl text-xs font-bold">
+                Rejected
+            </span>
+
+        @endif
+
+    </td>
+
+        <td class="px-8 py-6">
             <p class="font-bold text-indigo-600">
                 Rp {{ number_format($event->price) }}
             </p>

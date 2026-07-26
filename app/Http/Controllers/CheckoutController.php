@@ -42,13 +42,14 @@ class CheckoutController extends Controller
         $totalPrice = $event->price + 5000;
     
         $transaction = Transaction::create([
-            'event_id'       => $event->id,
-            'order_id'       => $orderId,
-            'customer_name'  => $request->customer_name,
-            'customer_email' => $request->customer_email,
-            'customer_phone' => $request->customer_phone,
-            'total_price'    => $totalPrice,
-            'status'         => 'pending',
+            'organization_id' => $event->organization_id,
+            'event_id'        => $event->id,
+            'order_id'        => $orderId,
+            'customer_name'   => $request->customer_name,
+            'customer_email'  => $request->customer_email,
+            'customer_phone'  => $request->customer_phone,
+            'total_price'     => $totalPrice,
+            'status'          => 'pending',
         ]);
     
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');

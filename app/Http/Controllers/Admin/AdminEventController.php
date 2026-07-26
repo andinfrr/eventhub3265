@@ -12,10 +12,14 @@ use App\Models\Category;
 
 class AdminEventController extends Controller
 {
-public function index()
+    public function index()
     {
-    $events = Event::all();
-    return view('admin.events', compact('events'));
+        $events = Event::where(
+            'organization_id',
+            auth()->user()->organization_id
+        )->get();
+
+        return view('admin.events', compact('events'));
     }
 
    public function create()
@@ -44,20 +48,31 @@ public function index()
             ->store('posters', 'public');
     }
 
+    $data['organization_id'] = auth()->user()->organization_id;
+    $data['status'] = 'pending';
+
     Event::create($data);
 
     return redirect('/admin/events');
 }
+
 public function edit($id)
 {
-    $event = Event::findOrFail($id);
+    $event = Event::where(
+        'organization_id',
+        auth()->user()->organization_id
+    )->findOrFail($id);
     $categories = Category::all();
 
     return view('admin.edit-event', compact('event', 'categories'));
 }
+
 public function update(Request $request, $id)
 {
-    $event = Event::findOrFail($id);
+    $event = Event::where(
+        'organization_id',
+        auth()->user()->organization_id
+    )->findOrFail($id);
 
     $data = $request->validate([
         'category_id' => 'required|exists:categories,id',
@@ -86,9 +101,13 @@ public function update(Request $request, $id)
 
     return redirect('/admin/events');
 }
+
 public function destroy($id)
 {
-    $event = Event::findOrFail($id);
+    $event = Event::where(
+        'organization_id',
+        auth()->user()->organization_id
+    )->findOrFail($id);
 
     if ($event->poster_path) {
         Storage::disk('public')
@@ -98,6 +117,46 @@ public function destroy($id)
     $event->delete();
 
     return redirect('/admin/events');
+}
+
+public function approval()
+{
+    $events = Event::with('organization','category')
+        ->latest()
+        ->get();
+
+    return view(
+        'admin.event-approval',
+        compact('events')
+    );
+}
+
+public function approve($id)
+{
+    $event = Event::findOrFail($id);
+
+    $event->update([
+        'status' => 'approved'
+    ]);
+
+    return back()->with(
+        'success',
+        'Event berhasil diapprove.'
+    );
+}
+
+public function reject($id)
+{
+    $event = Event::findOrFail($id);
+
+    $event->update([
+        'status' => 'rejected'
+    ]);
+
+    return back()->with(
+        'success',
+        'Event ditolak.'
+    );
 }
 }
 

@@ -8,32 +8,62 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Akun Admin Utama
-        \App\Models\User::create([
+        // Seeder Organization
+        $this->call([
+            OrganizationSeeder::class,
+        ]);
+
+        // Admin
+
+     \App\Models\User::firstOrCreate(
+        [
+            'email' => 'superadmin@eventhub.com'
+        ],
+        [
+            'name' => 'Super Admin',
+            'password' => bcrypt('password'),
+            'role' => 'superadmin',
+            'organization_id' => null,
+        ]
+    );
+
+    \App\Models\User::firstOrCreate(
+        [
+            'email' => 'admin@amikom.ac.id'
+        ],
+        [
             'name' => 'Admin Amikom',
-            'email' => 'admin@amikom.ac.id',
             'password' => bcrypt('password'),
             'role' => 'admin',
-        ]);
+            'organization_id' => 1,
+        ]
+    );
 
-        // 2. Insert Kategori Event
-        $category = \App\Models\Category::create([
-            'name' => 'Seminar',
-            'slug' => 'seminar',
-        ]);
+        // ==========================
+        // CATEGORY
+        // ==========================
 
-        $category2 = \App\Models\Category::firstOrCreate([
-            'name' => 'Konser',
-            'slug' => 'konser',
-        ]);
+        $category = \App\Models\Category::firstOrCreate(
+            ['name' => 'Seminar'],
+            ['description' => 'Kategori Seminar']
+        );
 
-        $category3 = \App\Models\Category::firstOrCreate([
-            'name' => 'Workshop',
-            'slug' => 'workshop',
-        ]);
+        $category2 = \App\Models\Category::firstOrCreate(
+            ['name' => 'Konser'],
+            ['description' => 'Kategori Konser']
+        );
 
-        // 3. Insert Sampel Events
+        $category3 = \App\Models\Category::firstOrCreate(
+            ['name' => 'Workshop'],
+            ['description' => 'Kategori Workshop']
+        );
+
+        // ==========================
+        // EVENTS
+        // ==========================
+
         \App\Models\Event::create([
+            'organization_id' => 1,
             'category_id' => $category2->id,
             'title' => 'Jazz Night 2026',
             'description' => 'Nikmati malam dengan alunan musik jazz.',
@@ -45,6 +75,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         \App\Models\Event::create([
+            'organization_id' => 1,
             'category_id' => $category->id,
             'title' => 'Seminar Cyber Security',
             'description' => 'Belajar keamanan siber bersama praktisi.',
@@ -56,6 +87,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         \App\Models\Event::create([
+            'organization_id' => 1,
             'category_id' => $category->id,
             'title' => 'AI Future Tech Summit',
             'description' => 'Membahas perkembangan AI masa depan.',
@@ -67,6 +99,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         \App\Models\Event::create([
+            'organization_id' => 1,
             'category_id' => $category2->id,
             'title' => 'Campus Music Fest',
             'description' => 'Festival musik kampus dengan guest star.',
@@ -78,6 +111,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         \App\Models\Event::create([
+            'organization_id' => 1,
             'category_id' => $category3->id,
             'title' => 'Workshop UI/UX Design',
             'description' => 'Pelatihan desain aplikasi modern.',
@@ -89,6 +123,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         \App\Models\Event::create([
+            'organization_id' => 1,
             'category_id' => $category3->id,
             'title' => 'Workshop Public Speaking',
             'description' => 'Latihan berbicara percaya diri di depan umum.',

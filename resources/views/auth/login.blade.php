@@ -16,6 +16,12 @@
             <p class="text-slate-500">AmikomEventHub Dashboard</p>
         </div>
 
+        @if ($errors->any())
+            <div class="mb-4 rounded-lg bg-red-100 border border-red-300 text-red-700 px-4 py-3">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
         @if(session('error'))
             <div class="bg-red-100 text-red-600 p-4 rounded-xl mb-6 font-bold text-sm text-center">
                 {{ session('error') }}

@@ -10,11 +10,14 @@ use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AdminEventController;
 use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\Admin\OrganizationController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\JabatanController;
 use App\Http\Controllers\Admin\PengurusController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\Auth\RegisterOrganizationController;
+
 
 
 Route::get('/login', function () {
@@ -65,6 +68,17 @@ Route::get('/checkout/{event}', [CheckoutController::class, 'create'])
 Route::post('/checkout/{event}', [CheckoutController::class, 'store'])
     ->name('checkout.store');
 
+/*
+|--------------------------------------------------------------------------
+| REGISTER ORGANIZATION
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/register-organization', [RegisterOrganizationController::class, 'create'])
+    ->name('organization.register');
+
+Route::post('/register-organization', [RegisterOrganizationController::class, 'store'])
+    ->name('organization.store');
 /*
 |--------------------------------------------------------------------------
 | RATING
@@ -128,6 +142,31 @@ Route::prefix('admin')
 
     // PENGURUS CRUD
     Route::resource('pengurus', PengurusController::class);
+
+    // ORGANIZATION & EVENT APPROVAL (khusus Super Admin)
+    Route::middleware('superadmin')->group(function () {
+
+        // ORGANIZATION
+        Route::get('/organizations', [OrganizationController::class, 'index'])
+            ->name('organizations.index');
+
+        Route::patch('/organizations/{id}/approve', [OrganizationController::class, 'approve'])
+            ->name('organizations.approve');
+
+        Route::patch('/organizations/{id}/reject', [OrganizationController::class, 'reject'])
+            ->name('organizations.reject');
+
+        // EVENT APPROVAL
+        Route::get('/event-approval', [AdminEventController::class, 'approval'])
+            ->name('admin.events.approval');
+
+        Route::patch('/event-approval/{id}/approve', [AdminEventController::class, 'approve'])
+            ->name('admin.events.approve');
+
+        Route::patch('/event-approval/{id}/reject', [AdminEventController::class, 'reject'])
+            ->name('admin.events.reject');
+
+    });
 });
 
 // PAYMENT MIDTRANS

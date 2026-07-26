@@ -9,21 +9,24 @@ use App\Models\Partner;
 
 class HomeController extends Controller
 {
-   public function index(Request $request)
-{
-    $categories = Category::all();
+    public function index(Request $request)
+    {
+        $categories = Category::all();
 
-    $events = Event::query();
+        $events = Event::where('status', 'approved')
+            ->whereHas('organization', function ($query) {
+                $query->where('status', 'approved');
+            });
 
-    if ($request->category) {
-        if ($request->category) {
-    $events->where('category_id', $request->category);
-}
+        // Filter kategori
+        if ($request->filled('category')) {
+            $events->where('category_id', $request->category);
+        }
+
+        $events = $events->latest()->get();
+
+        $partners = Partner::all();
+
+        return view('welcome', compact('events', 'categories', 'partners'));
     }
-
-    $events = $events->get();
-    $partners = Partner::all();
-    
-    return view('welcome', compact('events', 'categories', 'partners'));
-}
 }

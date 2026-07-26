@@ -22,8 +22,24 @@ class AuthController extends Controller
         'password' => ['required'],
     ]);
 
-    if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials)) {
+
         $request->session()->regenerate();
+
+        $user = Auth::user();
+
+        if (
+            $user->role === 'admin' &&
+            $user->organization &&
+            $user->organization->status !== 'approved'
+        ) {
+            Auth::logout();
+
+            return back()->withErrors([
+                'email' => 'Organisasi Anda masih menunggu persetujuan Super Admin.',
+            ]);
+        }
+
         return redirect()->route('admin.dashboard');
     }
 

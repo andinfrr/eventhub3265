@@ -47,16 +47,10 @@
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
                 {{ Request::is('admin/dashboard') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
 
-                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4
-                        16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0
-                        01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0
-                        01-2 2h-2a2 2 0 01-2-2v-2z">
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z">
                     </path>
-
                 </svg>
 
                 Dashboard
@@ -67,14 +61,11 @@
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
                 {{ Request::is('admin/categories*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
 
-                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         stroke-width="2"
                         d="M3 7h18M3 12h18M3 17h18">
                     </path>
-
                 </svg>
 
                 Kategori
@@ -85,38 +76,78 @@
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
                 {{ Request::is('admin/partners*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
 
-                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
-
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round"
                         stroke-width="2"
-                        d="M17 20h5V4H2v16h5m10 0v-6a2 2 0 00-2-2H9a2 2 0
-                        00-2 2v6m10 0H7">
+                        d="M17 20h5V4H2v16h5m10 0v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6m10 0H7">
                     </path>
-
                 </svg>
 
                 Partner
             </a>
 
-            <!-- EVENT -->
-            <a href="{{ route('admin.events') }}"
-                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
-                {{ Request::is('admin/events*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
+            @if(auth()->user()->role == 'superadmin')
 
-                <svg class="w-5 h-5" fill="none" stroke="currentColor"
-                    viewBox="0 0 24 24">
+                <!-- APPROVAL EVENT -->
+                <a href="{{ route('admin.events.approval') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
+                    {{ Request::is('admin/event-approval*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
 
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                        stroke-width="2"
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0
-                        00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
-                    </path>
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
 
-                </svg>
+                        <path stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2A9 9 0 1112 3a9 9 0 017 11z">
+                        </path>
 
-                Kelola Event
-            </a>
+                    </svg>
+
+                    Approval Event
+                </a>
+
+                <!-- ORGANISASI -->
+                <a href="{{ route('organizations.index') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
+                    {{ Request::is('admin/organizations*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
+
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+
+                        <path stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M17 20h5V4H2v16h5m10 0v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6m10 0H7">
+                        </path>
+
+                    </svg>
+
+                    Organisasi
+                </a>
+
+            @else
+
+                <!-- KELOLA EVENT -->
+                <a href="{{ route('admin.events') }}"
+                    class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
+                    {{ Request::is('admin/events*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
+
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+
+                        <path stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+
+                    </svg>
+
+                    Kelola Event
+                </a>
+
+            @endif
 
             <!-- TRANSAKSI -->
             <a href="{{ route('transactions.index') }}"
@@ -126,13 +157,10 @@
                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
 
-                    <path stroke-linecap="round" stroke-linejoin="round"
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
                         stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0
-                        002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012
-                        2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0
-                        012-2h2a2 2 0 012 2v14a2 2 0 01-2
-                        2h-2a2 2 0 01-2-2z">
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
                     </path>
 
                 </svg>
@@ -140,64 +168,57 @@
                 Laporan Transaksi
             </a>
 
-             <!-- jabatan -->
+            <!-- JABATAN -->
             <a href="{{ route('jabatan.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
-                {{ Request::is('admin/transactions*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
+                {{ Request::is('admin/jabatan*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
 
                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
-
-                    <path stroke-linecap="round" stroke-linejoin="round"
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
                         stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0
-                        002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012
-                        2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0
-                        012-2h2a2 2 0 012 2v14a2 2 0 01-2
-                        2h-2a2 2 0 01-2-2z">
+                        d="M12 4v16m8-8H4">
                     </path>
-
                 </svg>
 
                 Jabatan
             </a>
 
-             <!-- pengurus -->
+            <!-- PENGURUS -->
             <a href="{{ route('pengurus.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
-                {{ Request::is('admin/transactions*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
+                {{ Request::is('admin/pengurus*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
 
                 <svg class="w-5 h-5" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
-
-                    <path stroke-linecap="round" stroke-linejoin="round"
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
                         stroke-width="2"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0
-                        002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012
-                        2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0
-                        012-2h2a2 2 0 012 2v14a2 2 0 01-2
-                        2h-2a2 2 0 01-2-2z">
+                        d="M17 20h5V4H2v16h5m10 0v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6m10 0H7">
                     </path>
-
                 </svg>
 
                 Pengurus
             </a>
 
-             <!-- FOOTER -->
+        </nav>
+
+        <!-- FOOTER -->
         <div class="pt-6 border-t border-indigo-800">
 
-        <form action="{{ route('admin.logout') }}" method="POST">
-            @csrf
-        
-            <button type="submit"
-                class="flex items-center gap-3 px-4 py-3 text-indigo-300 hover:text-white transition font-medium">
-        
-                Keluar
-        
-            </button>
-        
-        </form>
+            <form action="{{ route('admin.logout') }}" method="POST">
+                @csrf
+
+                <button
+                    type="submit"
+                    class="flex items-center gap-3 px-4 py-3 text-indigo-300 hover:text-white transition font-medium">
+
+                    Keluar
+
+                </button>
+
+            </form>
 
         </div>
 

@@ -12,15 +12,23 @@ class EventController extends Controller
     {
         $categories = Category::all();
 
-        $events = Event::when($request->category, function ($query) use ($request) {
-            $query->where('category_id', $request->category);
-        })->get();
+        $events = Event::where('status', 'approved')
+            ->when($request->category, function ($query) use ($request) {
+                $query->where('category_id', $request->category);
+            })
+            ->latest()
+            ->get();
 
         return view('welcome', compact('events', 'categories'));
     }
 
-    public function show(Event $event)
+    public function show($id)
     {
+        $event = Event::whereHas('organization', function ($query) {
+                $query->where('status', 'approved');
+            })
+            ->findOrFail($id);
+
         $categories = Category::all();
 
         // Ambil semua rating beserta user
