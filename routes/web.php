@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\TicketController;
+use App\Http\Controllers\RatingController;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\AdminEventController;
@@ -64,7 +65,18 @@ Route::get('/checkout/{event}', [CheckoutController::class, 'create'])
 Route::post('/checkout/{event}', [CheckoutController::class, 'store'])
     ->name('checkout.store');
 
+/*
+|--------------------------------------------------------------------------
+| RATING
+|--------------------------------------------------------------------------
+*/
 
+Route::middleware('auth')->group(function () {
+
+    Route::post('/ratings', [RatingController::class, 'store'])
+        ->name('ratings.store');
+
+});
     // WEBHOK
 Route::post('/midtrans/callback', [\App\Http\Controllers\MidtransWebhookController::class, 'handle']);
 

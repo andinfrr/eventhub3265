@@ -9,24 +9,38 @@ use Illuminate\Http\Request;
 class EventController extends Controller
 {
     public function event(Request $request)
-{
-    $categories = Category::all();
+    {
+        $categories = Category::all();
 
-    $events = Event::when($request->category, function ($query) use ($request) {
-        $query->where('category_id', $request->category);
-    })->get();
+        $events = Event::when($request->category, function ($query) use ($request) {
+            $query->where('category_id', $request->category);
+        })->get();
 
-    return view('welcome', compact('events', 'categories'));
-}
-	
+        return view('welcome', compact('events', 'categories'));
+    }
+
     public function show(Event $event)
-{
-    $categories = Category::all();
+    {
+        $categories = Category::all();
 
-    return view('event-detail', compact('event', 'categories'));
-}
+        // Ambil semua rating beserta user
+        $ratings = $event->ratings()
+            ->with('user')
+            ->latest()
+            ->get();
 
-	public function checkout()
+        // Hitung rata-rata rating
+        $averageRating = $event->ratings()->avg('rating');
+
+        return view('event-detail', compact(
+            'event',
+            'categories',
+            'ratings',
+            'averageRating'
+        ));
+    }
+
+    public function checkout()
     {
         return view('checkout');
     }

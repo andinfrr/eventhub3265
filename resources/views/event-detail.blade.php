@@ -115,6 +115,301 @@
                     </li>
                 </ul>
             </div>
+           {{-- ========================================================= --}}
+{{-- RATING & REVIEW --}}
+{{-- ========================================================= --}}
+
+<div class="bg-white rounded-[2rem] shadow-lg border border-slate-200 p-8 mt-10">
+
+    <div class="flex items-center justify-between mb-8">
+
+        <div>
+
+            <h2 class="text-2xl font-black text-slate-800">
+                Rating Event
+            </h2>
+
+            <p class="text-slate-500 mt-1">
+                Bagikan pengalamanmu setelah mengikuti event ini.
+            </p>
+
+        </div>
+
+        <div class="text-right">
+
+            <h1 class="text-5xl font-black text-indigo-600">
+
+                {{ $averageRating ? number_format($averageRating,1) : '0.0' }}
+
+            </h1>
+
+            <div class="text-yellow-400 text-xl">
+
+                ⭐⭐⭐⭐⭐
+
+            </div>
+
+            <small class="text-slate-500">
+
+                {{ $ratings->count() }} Review
+
+            </small>
+
+        </div>
+
+    </div>
+
+    {{-- ALERT --}}
+    @if(session('success'))
+
+        <div class="mb-5 bg-green-100 border border-green-300 text-green-700 rounded-xl px-5 py-3">
+
+            {{ session('success') }}
+
+        </div>
+
+    @endif
+
+    {{-- FORM RATING --}}
+    @auth
+
+    <form action="{{ route('ratings.store') }}" method="POST">
+
+        @csrf
+
+        <input type="hidden"
+               name="event_id"
+               value="{{ $event->id }}">
+
+        <div class="mb-5">
+
+            <label class="block font-bold mb-3">
+
+                Berikan Rating
+
+            </label>
+
+            <div class="flex gap-2 mb-3">
+
+    @for($i=1;$i<=5;$i++)
+
+        <svg
+            data-value="{{ $i }}"
+            class="star w-10 h-10 cursor-pointer text-gray-300 transition hover:scale-110"
+            fill="currentColor"
+            viewBox="0 0 20 20">
+
+            <path d="M9.049.927c.3-.921 1.603-.921 1.902 0l1.562 4.81a1 1 0 00.95.69h5.057c.969 0 1.371 1.24.588 1.81l-4.09 2.97a1 1 0 00-.364 1.118l1.562 4.81c.3.921-.755 1.688-1.54 1.118l-4.09-2.97a1 1 0 00-1.176 0l-4.09 2.97c-.784.57-1.838-.197-1.539-1.118l1.562-4.81a1 1 0 00-.364-1.118L.39 8.237c-.783-.57-.38-1.81.588-1.81h5.057a1 1 0 00.95-.69L9.05.927z"/>
+
+        </svg>
+
+    @endfor
+
+</div>
+
+<input
+    type="hidden"
+    name="rating"
+    id="rating"
+    required>
+        </div>
+
+        <div class="mb-6">
+
+            <label class="block font-bold mb-2">
+
+                Review
+
+            </label>
+
+            <textarea
+                name="review"
+                rows="4"
+                class="w-full border border-slate-200 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500"
+                placeholder="Ceritakan pengalamanmu mengikuti event ini..."></textarea>
+
+        </div>
+
+        <button
+            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold transition">
+
+            Kirim Rating
+
+        </button>
+
+    </form>
+
+    @else
+
+    <div class="bg-yellow-100 border border-yellow-300 rounded-2xl p-6">
+
+        <h3 class="font-bold text-yellow-700 mb-2">
+
+            Login Diperlukan
+
+        </h3>
+
+        <p class="text-yellow-700">
+
+            Silakan login menggunakan akun Google untuk memberikan rating.
+
+        </p>
+
+        <a href="{{ route('google.login') }}"
+           class="inline-block mt-4 px-5 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-bold">
+
+            Login dengan Google
+
+        </a>
+
+    </div>
+
+    @endauth
+
+</div>
+
+{{-- ========================================================= --}}
+{{-- REVIEW PENGGUNA --}}
+{{-- ========================================================= --}}
+
+<div class="mt-12">
+
+    <h2 class="text-2xl font-black mb-6">
+
+        Review Pengunjung
+
+    </h2>
+
+    @forelse($ratings as $rating)
+
+    <div class="bg-white rounded-3xl shadow border border-slate-100 p-6 mb-5">
+
+        <div class="flex justify-between items-center">
+
+            <div class="flex items-center gap-4">
+
+                <img
+                    src="{{ $rating->user->avatar ?? 'https://ui-avatars.com/api/?name='.urlencode($rating->user->name) }}"
+                    class="w-12 h-12 rounded-full object-cover">
+
+                <div>
+
+                    <h4 class="font-bold">
+
+                        {{ $rating->user->name }}
+
+                    </h4>
+
+                    <small class="text-slate-500">
+
+                        {{ $rating->created_at->diffForHumans() }}
+
+                    </small>
+
+                </div>
+
+            </div>
+
+            <div class="text-yellow-400 text-xl">
+
+                @for($i=1;$i<=5;$i++)
+
+                    {{ $i <= $rating->rating ? '⭐' : '☆' }}
+
+                @endfor
+
+            </div>
+
+        </div>
+
+        @if($rating->review)
+
+        <p class="mt-5 text-slate-600 italic">
+
+            "{{ $rating->review }}"
+
+        </p>
+
+        @endif
+
+    </div>
+
+    @empty
+
+    <div class="bg-slate-50 rounded-2xl border border-dashed border-slate-300 p-8 text-center">
+
+        <div class="text-5xl mb-3">
+
+            ⭐
+
+        </div>
+
+        <h3 class="font-bold text-lg">
+
+            Belum Ada Review
+
+        </h3>
+
+        <p class="text-slate-500 mt-2">
+
+            Jadilah orang pertama yang memberikan rating untuk event ini.
+
+        </p>
+
+    </div>
+
+    @endforelse
+
+</div>
         </div>
     </main>
+    <script>
+
+const stars = document.querySelectorAll(".star");
+const ratingInput = document.getElementById("rating");
+
+let currentRating = 0;
+
+stars.forEach((star,index)=>{
+
+    star.addEventListener("mouseover",()=>{
+
+        stars.forEach((s,i)=>{
+
+            s.classList.toggle("text-yellow-400",i<=index);
+            s.classList.toggle("text-gray-300",i>index);
+
+        });
+
+    });
+
+    star.addEventListener("click",()=>{
+
+        currentRating=index+1;
+
+        ratingInput.value=currentRating;
+
+        stars.forEach((s,i)=>{
+
+            s.classList.toggle("text-yellow-400",i<currentRating);
+            s.classList.toggle("text-gray-300",i>=currentRating);
+
+        });
+
+    });
+
+});
+
+document.querySelector(".star").parentElement.parentElement.addEventListener("mouseleave",()=>{
+
+    stars.forEach((s,i)=>{
+
+        s.classList.toggle("text-yellow-400",i<currentRating);
+        s.classList.toggle("text-gray-300",i>=currentRating);
+
+    });
+
+});
+
+</script>
 @endsection
