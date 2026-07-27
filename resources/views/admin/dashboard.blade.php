@@ -13,33 +13,50 @@
 
     <div class="bg-gradient-to-r from-indigo-600 to-violet-600 rounded-3xl p-8 text-white shadow-lg">
 
-        <div class="flex justify-between items-center">
+    <div class="flex items-center justify-between">
 
-            <div>
+        <div>
 
-                <p class="uppercase text-sm tracking-widest text-indigo-200 ">
-                    Total Pendapatan
-                </p>
+            <p class="uppercase tracking-widest text-indigo-200 text-sm">
+                Total Pendapatan
+            </p>
 
-                <h1 class="text-5xl font-black mt-2">
-                    Rp {{ number_format($totalRevenue,0,',','.') }}
-                </h1>
+            <h1 class="text-5xl font-black mt-2">
+                Rp {{ number_format($totalRevenue,0,',','.') }}
+            </h1>
 
-                <p class="mt-3 text-indigo-100">
-                    Total pemasukan dari seluruh transaksi yang berhasil.
+            <p class="mt-3 text-indigo-100">
+                Total pemasukan dari seluruh transaksi berhasil.
+            </p>
+
+        </div>
+
+        <div class="flex items-center gap-4">
+
+            <div class="text-right">
+
+                <h3 class="font-bold text-xl">
+                    AmikomEventHub
+                </h3>
+
+                <p class="text-indigo-200 text-sm">
+                    Admin Dashboard
                 </p>
 
             </div>
 
-            <div class="w-24 h-24 rounded-3xl bg-white/20 flex items-center justify-center">
+            <div
+                class="w-16 h-16 rounded-full bg-white text-indigo-600 font-black text-2xl flex items-center justify-center">
 
-                <!-- icon -->
+                AH
 
             </div>
 
         </div>
 
     </div>
+
+</div>
 
 </div>
     <div class="mt-100 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
@@ -87,6 +104,180 @@
              <h3 class="text-2xl font-black">{{ $pendingOrders }} Pesanan</h3>
          </div>
      </div>
+{{-- ============================= --}}
+{{-- DASHBOARD ANALYTICS --}}
+{{-- ============================= --}}
+
+{{-- ROW 1 --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+    {{-- Pendapatan --}}
+    <div class="lg:col-span-2 bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+
+        <div class="flex justify-between items-center mb-6">
+
+            <div>
+                <h2 class="text-xl font-black">
+                    📈 Pendapatan Bulanan
+                </h2>
+
+                <p class="text-sm text-slate-500">
+                    Total pendapatan transaksi berhasil
+                </p>
+            </div>
+
+            <span class="px-4 py-2 rounded-full bg-indigo-100 text-indigo-600 text-sm font-bold">
+                {{ now()->year }}
+            </span>
+
+        </div>
+
+        <canvas id="revenueChart" height="120"></canvas>
+
+    </div>
+
+    {{-- Status --}}
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+
+        <h2 class="text-xl font-black mb-5">
+
+            💳 Status Transaksi
+
+        </h2>
+
+        <div class="h-[320px] flex items-center justify-center">
+
+            <canvas id="statusChart"></canvas>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+{{-- ROW 2 --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+    {{-- Top Event --}}
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h2 class="text-xl font-black">
+
+                🏆 Event Terlaris
+
+            </h2>
+
+            <span class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">
+                Top 5
+            </span>
+
+        </div>
+
+        <canvas id="eventChart" height="180"></canvas>
+
+    </div>
+
+
+    {{-- Rating --}}
+    <div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+
+        <div class="flex justify-between items-center mb-5">
+
+            <h2 class="text-xl font-black">
+
+                ⭐ Rating Event
+
+            </h2>
+
+            <span class="text-xs bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">
+
+                Review
+
+            </span>
+
+        </div>
+
+        <canvas id="ratingChart" height="180"></canvas>
+
+    </div>
+
+</div>
+
+
+{{-- ROW 3 --}}
+<div class="bg-white rounded-3xl border border-slate-200 shadow-sm p-6">
+
+    <div class="flex justify-between items-center mb-6">
+
+        <h2 class="text-xl font-black">
+
+            🔥 Event Hampir Sold Out
+
+        </h2>
+
+        <span class="text-sm text-red-500 font-semibold">
+
+            Stok Menipis
+
+        </span>
+
+    </div>
+
+    <div class="space-y-5">
+
+        @forelse($lowStockEvents as $event)
+
+            @php
+
+                $sold = max(5,100-($event->stock/200*100));
+
+            @endphp
+
+            <div>
+
+                <div class="flex justify-between mb-2">
+
+                    <span class="font-semibold">
+
+                        {{ $event->title }}
+
+                    </span>
+
+                    <span class="font-bold text-red-500">
+
+                        {{ $event->stock }} tiket
+
+                    </span>
+
+                </div>
+
+                <div class="w-full h-3 bg-slate-200 rounded-full">
+
+                    <div
+                        class="bg-gradient-to-r from-red-500 to-orange-500 h-3 rounded-full"
+                        style="width:{{ $sold }}%">
+                    </div>
+
+                </div>
+
+            </div>
+
+        @empty
+
+            <div class="text-center py-10 text-slate-400">
+
+                Tidak ada event dengan stok rendah.
+
+            </div>
+
+        @endforelse
+
+    </div>
+
+</div>
 
          <div class="p-8 border-b flex justify-between items-center">
              <h3 class="font-black text-xl">Transaksi Terakhir</h3>
@@ -132,5 +323,240 @@
              </table>
          </div>
      </div>
-     
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+
+// ==========================
+// Pendapatan per Bulan
+// ==========================
+
+new Chart(document.getElementById('revenueChart'), {
+
+    type: 'line',
+
+    data: {
+
+        labels: @json($monthLabels),
+
+        datasets: [{
+
+            label: 'Pendapatan',
+
+            data: @json($monthRevenue),
+
+            borderColor: '#4F46E5',
+
+            backgroundColor: 'rgba(79,70,229,0.15)',
+
+            fill: true,
+
+            tension: 0.4,
+
+            borderWidth: 3,
+
+            pointRadius: 4,
+
+            pointBackgroundColor: '#4F46E5'
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        plugins: {
+
+            legend: {
+
+                display: false
+
+            }
+
+        },
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true
+
+            }
+
+        }
+
+    }
+
+});
+
+
+// ==========================
+// Status Transaksi
+// ==========================
+
+new Chart(document.getElementById('statusChart'), {
+
+    type: 'doughnut',
+
+    data: {
+
+        labels: @json($statusChart->pluck('status')),
+
+        datasets: [{
+
+            data: @json($statusChart->pluck('total')),
+
+            backgroundColor: [
+
+                '#22C55E',
+
+                '#FACC15',
+
+                '#EF4444',
+
+                '#6366F1',
+
+                '#0EA5E9'
+
+            ],
+
+            borderWidth: 0
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        plugins: {
+
+            legend: {
+
+                position: 'bottom'
+
+            }
+
+        }
+
+    }
+
+});
+
+
+// ==========================
+// Top Event Terlaris
+// ==========================
+
+new Chart(document.getElementById('eventChart'), {
+
+    type: 'bar',
+
+    data: {
+
+        labels: @json($popularEvents->pluck('title')),
+
+        datasets: [{
+
+            label: 'Tiket Terjual',
+
+            data: @json($popularEvents->pluck('total')),
+
+            backgroundColor: '#6366F1',
+
+            borderRadius: 12
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        indexAxis: 'y',
+
+        plugins: {
+
+            legend: {
+
+                display: false
+
+            }
+
+        },
+
+        scales: {
+
+            x: {
+
+                beginAtZero: true
+
+            }
+
+        }
+
+    }
+
+});
+
+
+// ==========================
+// Statistik Rating
+// ==========================
+
+new Chart(document.getElementById('ratingChart'), {
+
+    type: 'bar',
+
+    data: {
+
+        labels: @json($ratingChart->pluck('rating')),
+
+        datasets: [{
+
+            label: 'Jumlah Review',
+
+            data: @json($ratingChart->pluck('total')),
+
+            backgroundColor: '#FACC15',
+
+            borderRadius: 10
+
+        }]
+
+    },
+
+    options: {
+
+        responsive: true,
+
+        plugins: {
+
+            legend: {
+
+                display: false
+
+            }
+
+        },
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true
+
+            }
+
+        }
+
+    }
+
+});
+
+</script>
      @endsection
