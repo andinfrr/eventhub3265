@@ -43,10 +43,64 @@
                      <span>Biaya Layanan</span>
                      <span>Rp 5.000</span>
                  </div>
-                 <div class="flex justify-between text-2xl font-black mt-4 pt-4 border-t">
-                     <span>Total Bayar</span>
-                     <span class="text-indigo-600">Rp {{ number_format($event->price + 5000, 0, ',', '.') }}</span>
-                 </div>
+                <hr>
+                <form
+                    action="{{ route('checkout.applyCoupon', $event->id) }}"
+                    method="POST"
+                    class="space-y-3">
+                    @csrf
+                    <label class="font-semibold text-slate-700">
+                        Kode Voucher
+                    </label>
+                    <div class="flex gap-2">
+                        <input
+                            type="text"
+                            name="coupon"
+                            value="{{ session('coupon_code') }}"
+                            placeholder="Contoh: MAHASISWA50"
+                            class="flex-1 px-4 py-3 border rounded-xl">
+                        <button
+                            class="px-5 bg-indigo-600 text-white rounded-xl font-bold">
+                            Terapkan
+                        </button>
+                    </div>
+                </form>
+                @if(session('coupon_success'))
+                <div class="mt-3 p-3 rounded-xl bg-green-100 text-green-700">
+                    {{ session('coupon_success') }}
+                </div>
+                @endif
+                @if(session('coupon_error'))
+                <div class="mt-3 p-3 rounded-xl bg-red-100 text-red-700">
+                    {{ session('coupon_error') }}
+                </div>
+                @endif
+                @if(session('coupon_code'))
+                <div class="mt-3 p-3 rounded-xl bg-blue-100 text-blue-700">
+
+                    Voucher digunakan:
+                    <strong>{{ session('coupon_code') }}</strong>
+
+                </div>
+
+                @endif
+                @if(session('discount_amount'))
+
+                <div class="flex justify-between text-green-600 font-bold">
+                    <span>Potongan Voucher</span>
+
+                    <span>
+                        - Rp {{ number_format(session('discount_amount'),0,',','.') }}
+                    </span>
+                </div>
+
+                @endif
+                <div class="flex justify-between text-2xl font-black mt-4 pt-4 border-t">
+                    <span>Total Bayar</span>
+                    <span class="text-indigo-600">
+                        Rp {{ number_format(session('final_price', $event->price + 5000),0,',','.') }}
+                    </span>
+                </div>
              </div>
          </div>
 

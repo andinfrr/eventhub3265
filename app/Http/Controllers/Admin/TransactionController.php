@@ -10,11 +10,15 @@ class TransactionController extends Controller
 {
   public function index(Request $request)
 {
-    $query = Transaction::with('event')
-    ->where('organization_id', auth()->user()->organization_id);
+    $query = Transaction::with(['event', 'organization']);
+
+    // Kalau bukan super admin, hanya lihat transaksi organisasinya sendiri
+    if (auth()->user()->role !== 'superadmin') {
+        $query->where('organization_id', auth()->user()->organization_id);
+    }
 
     // SEARCH
-    if ($request->search) {
+    if ($request->filled('search')) {
         $query->where(function ($q) use ($request) {
             $q->where('order_id', 'like', '%' . $request->search . '%')
               ->orWhere('customer_name', 'like', '%' . $request->search . '%')
@@ -22,20 +26,22 @@ class TransactionController extends Controller
         });
     }
 
-    // STATUS FILTER
-    if ($request->status && $request->status != 'all') {
+    // STATUS
+    if ($request->filled('status') && $request->status != 'all') {
         $query->where('status', $request->status);
     }
 
-    // MONTH FILTER
+    // BULAN
     if ($request->month == 'this_month') {
         $query->whereMonth('created_at', now()->month)
               ->whereYear('created_at', now()->year);
     }
 
     if ($request->month == 'last_month') {
-        $query->whereMonth('created_at', now()->subMonth()->month)
-              ->whereYear('created_at', now()->subMonth()->year);
+        $lastMonth = now()->subMonth();
+
+        $query->whereMonth('created_at', $lastMonth->month)
+              ->whereYear('created_at', $lastMonth->year);
     }
 
     $transactions = $query
@@ -43,6 +49,6 @@ class TransactionController extends Controller
         ->paginate(20)
         ->withQueryString();
 
-   return view('admin.transactions.index', compact('transactions'));
+    return view('admin.transactions.index', compact('transactions'));
 }
 }

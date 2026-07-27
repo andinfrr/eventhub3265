@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\Transaction;
 use App\Models\Category;
+use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
@@ -25,6 +26,64 @@ class CheckoutController extends Controller
         ));
     }
 
+    public function applyCoupon(Request $request, Event $event)
+    {
+        $request->validate([
+            'coupon' => 'required|string'
+        ]);
+
+        $coupon = Coupon::where('code', strtoupper($request->coupon))->first();
+
+        if (!$coupon) {
+            return back()->with('coupon_error', 'Kode voucher tidak ditemukan.');
+        }
+
+        if (!$coupon->status) {
+            return back()->with('coupon_error', 'Voucher sudah tidak aktif.');
+        }
+
+        if ($coupon->expired_at && $coupon->expired_at < now()) {
+            return back()->with('coupon_error', 'Voucher sudah kedaluwarsa.');
+        }
+
+        if ($coupon->used >= $coupon->max_usage) {
+            return back()->with('coupon_error', 'Kuota voucher sudah habis.');
+        }
+
+        // Harga tiket + biaya layanan
+        $subtotal = $event->price + 5000;
+
+        // Hitung diskon
+        if ($coupon->discount_type == 'percent') {
+
+            $discount = ($subtotal * $coupon->discount_value) / 100;
+
+        } else {
+
+            $discount = $coupon->discount_value;
+
+        }
+
+        // Jangan sampai diskon lebih besar dari total
+        if ($discount > $subtotal) {
+            $discount = $subtotal;
+        }
+
+        $finalPrice = $subtotal - $discount;
+
+        session([
+            'coupon_id'       => $coupon->id,
+            'coupon_code'     => $coupon->code,
+            'discount_amount' => $discount,
+            'final_price'     => $finalPrice,
+        ]);
+
+        return back()->with(
+            'coupon_success',
+            'Voucher berhasil diterapkan.'
+        );
+    }
+
     public function store(Request $request, Event $event)
     {
         $request->validate([
@@ -38,9 +97,9 @@ class CheckoutController extends Controller
         }
     
         $orderId = 'TRX-' . time() . '-' . Str::random(5);
-    
-        $totalPrice = $event->price + 5000;
-    
+
+        $totalPrice = session('final_price', $event->price + 5000);
+
         $transaction = Transaction::create([
             'organization_id' => $event->organization_id,
             'event_id'        => $event->id,
@@ -50,6 +109,7 @@ class CheckoutController extends Controller
             'customer_phone'  => $request->customer_phone,
             'total_price'     => $totalPrice,
             'status'          => 'pending',
+            'coupon_code'     => session('coupon_code'),
         ]);
     
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
@@ -77,6 +137,13 @@ class CheckoutController extends Controller
             $transaction->update([
                 'snap_token' => $snapToken
             ]);
+
+        session()->forget([
+            'coupon_id',
+            'coupon_code',
+            'discount_amount',
+            'final_price'
+        ]);
     
             return redirect()->route('checkout.payment', $transaction->order_id);
     
@@ -112,37 +179,56 @@ class CheckoutController extends Controller
         try {
             // Mengecek status pesanan secara mandiri (Bypass)
             $status = \Midtrans\Transaction::status($order_id);
-            
+
             if ($status) {
-                // Mengambil nilai status transaksi
-                $trx_status = is_array($status) ? ($status['transaction_status'] ?? '') : ($status->transaction_status ?? '');
-                
-                // Jika API Midtrans mengonfirmasi bahwa transaksi telah berhasil (settlement / capture)
+
+                $trx_status = is_array($status)
+                    ? ($status['transaction_status'] ?? '')
+                    : ($status->transaction_status ?? '');
+
                 if (in_array($trx_status, ['settlement', 'capture'])) {
-                    // Hanya lakukan update jika status di database lokal masih 'pending' (indikasi Webhook tidak masuk)
+
                     if (strtolower($transaction->status) === 'pending') {
-                        $transaction->update(['status' => 'success']);
-                        
+
+                        $transaction->update([
+                            'status' => 'success'
+                        ]);
+
+                        // Tambah penggunaan voucher
+                        if ($transaction->coupon_code) {
+                            Coupon::where('code', $transaction->coupon_code)
+                                ->increment('used');
+                        }
+
+                        // Kurangi stok event
                         if ($transaction->event && $transaction->event->stock > 0) {
-                            $transaction->event->stock = $transaction->event->stock - 1;
-                            $transaction->event->save();
-                            
+
+                            $transaction->event->decrement('stock');
+
                             try {
+
                                 \Illuminate\Support\Facades\Mail::to($transaction->customer_email)
                                     ->send(new \App\Mail\EventTicketMail($transaction));
+
                             } catch (\Exception $e) {
-                                Log::error('Gagal mengirim email E-Ticket secara manual (Bypass): ' . $e->getMessage());
+
+                                Log::error('Gagal mengirim email E-Ticket: ' . $e->getMessage());
+
                             }
                         }
                     }
                 }
             }
-        } catch (\Exception $e) {
-            // Jika terjadi error dari API Midtrans (transaksi tidak valid), kembalikan ke beranda
-            return redirect()->route('home')->with('error', 'Transaksi tidak ditemukan atau gagal diproses oleh sistem pembayaran.');
-        }
 
-        return view('checkout.success', compact('transaction', 'categories'));
-    }
-    
+        } catch (\Exception $e) {
+
+        return redirect()
+        ->route('home')
+        ->with('error', 'Transaksi tidak ditemukan atau gagal diproses oleh sistem pembayaran.');
+        }
+        return view('checkout.success', compact(
+            'transaction',
+            'categories'
+            ));
+            }
 }

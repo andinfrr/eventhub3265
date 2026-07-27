@@ -17,6 +17,7 @@ class Transaction extends Model
     'total_price',
     'status',
     'snap_token',
+    'coupon_code',
     ];
 
 public function organization()

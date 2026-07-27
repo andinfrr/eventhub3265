@@ -71,6 +71,24 @@
                 Kategori
             </a>
 
+            <!-- VOUCHER -->
+            <a href="{{ route('coupons.index') }}"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition
+                {{ Request::is('admin/coupons*') ? 'bg-indigo-700 text-white' : 'hover:bg-indigo-800' }}">
+
+                <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                    viewBox="0 0 24 24">
+
+                    <path stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M12 8c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm7-3l-2.5 2.5a2 2 0 010 2.828L19 13l-2.5 2.5a2 2 0 010 2.828L19 21H5l2.5-2.5a2 2 0 010-2.828L5 13l2.5-2.5a2 2 0 010-2.828L5 5h14z"/>
+
+                </svg>
+
+                Voucher
+            </a>
+
             <!-- PARTNER -->
             <a href="{{ route('partners.index') }}"
                 class="flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition

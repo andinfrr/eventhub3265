@@ -19,6 +19,7 @@ return new class extends Migration
             $table->integer('total_price');
             $table->string('status')->default('Pending');
             $table->string('snap_token')->nullable();
+            $table->string('coupon_code')->nullable();
             $table->timestamps();
 });
     }

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\PartnerController;
 use App\Http\Controllers\Admin\JabatanController;
 use App\Http\Controllers\Admin\PengurusController;
+use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Auth\RegisterOrganizationController;
 
@@ -67,6 +68,15 @@ Route::get('/checkout/{event}', [CheckoutController::class, 'create'])
 
 Route::post('/checkout/{event}', [CheckoutController::class, 'store'])
     ->name('checkout.store');
+
+/*
+|--------------------------------------------------------------------------
+| APPLY COUPON
+|--------------------------------------------------------------------------
+*/
+
+Route::post('/checkout/{event}/coupon', [CheckoutController::class, 'applyCoupon'])
+    ->name('checkout.applyCoupon');
 
 /*
 |--------------------------------------------------------------------------
@@ -166,6 +176,8 @@ Route::prefix('admin')
         Route::patch('/event-approval/{id}/reject', [AdminEventController::class, 'reject'])
             ->name('admin.events.reject');
 
+        // COUPON CRUD
+        Route::resource('coupons', CouponController::class);
     });
 });
 
