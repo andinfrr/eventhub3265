@@ -11,7 +11,7 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $categories = Category::all();
+        $categories = Category::all();  
 
         $events = Event::where('status', 'approved')
             ->whereHas('organization', function ($query) {
