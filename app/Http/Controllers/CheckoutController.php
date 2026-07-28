@@ -9,6 +9,8 @@ use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\CertificateMail;
 
 class CheckoutController extends Controller
 {
@@ -16,9 +18,9 @@ class CheckoutController extends Controller
     public function create(Event $event)
     {
         $categories = Category::all();
-    
+
         $user = auth()->user();
-    
+
         return view('checkout.create', compact(
             'event',
             'categories',
@@ -26,34 +28,43 @@ class CheckoutController extends Controller
         ));
     }
 
+
+
     public function applyCoupon(Request $request, Event $event)
     {
         $request->validate([
             'coupon' => 'required|string'
         ]);
 
+
         $coupon = Coupon::where('code', strtoupper($request->coupon))->first();
+
 
         if (!$coupon) {
             return back()->with('coupon_error', 'Kode voucher tidak ditemukan.');
         }
 
+
         if (!$coupon->status) {
             return back()->with('coupon_error', 'Voucher sudah tidak aktif.');
         }
+
 
         if ($coupon->expired_at && $coupon->expired_at < now()) {
             return back()->with('coupon_error', 'Voucher sudah kedaluwarsa.');
         }
 
+
         if ($coupon->used >= $coupon->max_usage) {
             return back()->with('coupon_error', 'Kuota voucher sudah habis.');
         }
 
-        // Harga tiket + biaya layanan
+
+
         $subtotal = $event->price + 5000;
 
-        // Hitung diskon
+
+
         if ($coupon->discount_type == 'percent') {
 
             $discount = ($subtotal * $coupon->discount_value) / 100;
@@ -64,12 +75,17 @@ class CheckoutController extends Controller
 
         }
 
-        // Jangan sampai diskon lebih besar dari total
+
+
         if ($discount > $subtotal) {
             $discount = $subtotal;
         }
 
+
+
         $finalPrice = $subtotal - $discount;
+
+
 
         session([
             'coupon_id'       => $coupon->id,
@@ -78,157 +94,365 @@ class CheckoutController extends Controller
             'final_price'     => $finalPrice,
         ]);
 
+
+
         return back()->with(
             'coupon_success',
             'Voucher berhasil diterapkan.'
         );
     }
 
+
+
+
     public function store(Request $request, Event $event)
     {
+
         $request->validate([
             'customer_name'  => 'required|string|max:255',
             'customer_email' => 'required|email|max:255',
             'customer_phone' => 'required|string|max:20',
         ]);
-    
+
+
+
         if ($event->stock <= 0) {
-            return back()->with('error', 'Mohon maaf, tiket untuk acara ini sudah habis.');
+
+            return back()->with(
+                'error',
+                'Mohon maaf, tiket untuk acara ini sudah habis.'
+            );
+
         }
-    
+
+
+
         $orderId = 'TRX-' . time() . '-' . Str::random(5);
 
-        $totalPrice = session('final_price', $event->price + 5000);
+
+
+        $totalPrice = session(
+            'final_price',
+            $event->price + 5000
+        );
+
+
 
         $transaction = Transaction::create([
+
             'organization_id' => $event->organization_id,
-            'event_id'        => $event->id,
-            'order_id'        => $orderId,
-            'customer_name'   => $request->customer_name,
-            'customer_email'  => $request->customer_email,
-            'customer_phone'  => $request->customer_phone,
-            'total_price'     => $totalPrice,
-            'status'          => 'pending',
-            'coupon_code'     => session('coupon_code'),
+
+            'event_id' => $event->id,
+
+            'order_id' => $orderId,
+
+            'customer_name' => $request->customer_name,
+
+            'customer_email' => $request->customer_email,
+
+            'customer_phone' => $request->customer_phone,
+
+            'total_price' => $totalPrice,
+
+            'status' => 'pending',
+
+            'coupon_code' => session('coupon_code'),
+
         ]);
-    
+
+
+
+
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+
         \Midtrans\Config::$isProduction = false;
+
         \Midtrans\Config::$isSanitized = true;
+
         \Midtrans\Config::$is3ds = true;
-    
+
+
+
+
         $params = [
+
             'transaction_details' => [
+
                 'order_id' => $orderId,
+
                 'gross_amount' => $totalPrice,
+
             ],
-    
+
+
             'customer_details' => [
+
                 'first_name' => $request->customer_name,
+
                 'email' => $request->customer_email,
+
                 'phone' => $request->customer_phone,
+
             ],
+
         ];
-    
+
+
+
+
         try {
-    
+
+
             $snapToken = \Midtrans\Snap::getSnapToken($params);
-    
+
+
+
             $transaction->update([
+
                 'snap_token' => $snapToken
+
             ]);
 
-        session()->forget([
-            'coupon_id',
-            'coupon_code',
-            'discount_amount',
-            'final_price'
-        ]);
-    
-            return redirect()->route('checkout.payment', $transaction->order_id);
-    
+
+
+            session()->forget([
+
+                'coupon_id',
+
+                'coupon_code',
+
+                'discount_amount',
+
+                'final_price'
+
+            ]);
+
+
+
+            return redirect()->route(
+                'checkout.payment',
+                $transaction->order_id
+            );
+
+
+
         } catch (\Exception $e) {
-    
-            return back()->with('error', $e->getMessage());
-    
+
+
+            return back()->with(
+                'error',
+                $e->getMessage()
+            );
+
+
         }
+
     }
+
+
+
+
 
     public function payment($order_id)
     {
-         // Mengambil daftar kategori untuk keperluan menu footer
-         $categories = \App\Models\Category::all();
 
-         $transaction = Transaction::with('event')->where('order_id', $order_id)->firstOrFail();
-         return view('checkout.payment', compact('transaction','categories'));
+        $categories = Category::all();
+
+
+        $transaction = Transaction::with('event')
+            ->where('order_id', $order_id)
+            ->firstOrFail();
+
+
+
+        return view(
+            'checkout.payment',
+            compact(
+                'transaction',
+                'categories'
+            )
+        );
+
     }
-    
-       public function success($order_id)
-    {
-        // Mengambil daftar kategori untuk keperluan menu footer
-        $categories = \App\Models\Category::all();
 
-        $transaction = Transaction::with('event')->where('order_id', $order_id)->firstOrFail();
-        
-        // Konfigurasi Midtrans untuk mengecek status transaksi langsung ke API
+
+
+
+
+
+    public function success($order_id)
+    {
+
+        $categories = Category::all();
+
+
+
+        $transaction = Transaction::with('event')
+            ->where('order_id', $order_id)
+            ->firstOrFail();
+
+
+
+
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
+
         \Midtrans\Config::$isProduction = false;
+
         \Midtrans\Config::$isSanitized = true;
+
         \Midtrans\Config::$is3ds = true;
 
+
+
+
         try {
-            // Mengecek status pesanan secara mandiri (Bypass)
+
+
             $status = \Midtrans\Transaction::status($order_id);
 
-            if ($status) {
 
-                $trx_status = is_array($status)
-                    ? ($status['transaction_status'] ?? '')
-                    : ($status->transaction_status ?? '');
 
-                if (in_array($trx_status, ['settlement', 'capture'])) {
+            $trx_status = is_array($status)
 
-                    if (strtolower($transaction->status) === 'pending') {
+                ? ($status['transaction_status'] ?? '')
 
-                        $transaction->update([
-                            'status' => 'success'
-                        ]);
+                : ($status->transaction_status ?? '');
 
-                        // Tambah penggunaan voucher
-                        if ($transaction->coupon_code) {
-                            Coupon::where('code', $transaction->coupon_code)
-                                ->increment('used');
-                        }
 
-                        // Kurangi stok event
-                        if ($transaction->event && $transaction->event->stock > 0) {
 
-                            $transaction->event->decrement('stock');
 
-                            try {
 
-                                \Illuminate\Support\Facades\Mail::to($transaction->customer_email)
-                                    ->send(new \App\Mail\EventTicketMail($transaction));
+            if (in_array($trx_status, ['settlement','capture'])) {
 
-                            } catch (\Exception $e) {
 
-                                Log::error('Gagal mengirim email E-Ticket: ' . $e->getMessage());
 
-                            }
-                        }
+                if (strtolower($transaction->status) == 'pending') {
+
+
+
+                    // Update transaksi sukses
+                    $transaction->update([
+
+                        'status' => 'success'
+
+                    ]);
+
+
+
+
+
+                    // Kirim E-Certificate
+                    try {
+
+
+                        Mail::to($transaction->customer_email)
+
+                            ->send(
+                                new CertificateMail($transaction)
+                            );
+
+
+                    } catch (\Exception $e) {
+
+
+                        Log::error(
+                            'Gagal kirim certificate: '
+                            .$e->getMessage()
+                        );
+
+
                     }
+
+
+
+
+
+                    // Tambah penggunaan voucher
+                    if ($transaction->coupon_code) {
+
+
+                        Coupon::where(
+                            'code',
+                            $transaction->coupon_code
+                        )->increment('used');
+
+
+                    }
+
+
+
+
+
+                    // Kurangi stok event
+                    if ($transaction->event && $transaction->event->stock > 0) {
+
+
+                        $transaction->event->decrement('stock');
+
+
+
+                        // Kirim E-Ticket
+                        try {
+
+
+                            Mail::to(
+                                $transaction->customer_email
+                            )->send(
+                                new \App\Mail\EventTicketMail($transaction)
+                            );
+
+
+
+                        } catch (\Exception $e) {
+
+
+                            Log::error(
+                                'Gagal kirim E-Ticket: '
+                                .$e->getMessage()
+                            );
+
+
+                        }
+
+
+                    }
+
+
+
                 }
+
+
             }
+
+
+
+
 
         } catch (\Exception $e) {
 
-        return redirect()
-        ->route('home')
-        ->with('error', 'Transaksi tidak ditemukan atau gagal diproses oleh sistem pembayaran.');
+
+            return redirect()
+                ->route('home')
+                ->with(
+                    'error',
+                    'Transaksi gagal diproses.'
+                );
+
+
         }
-        return view('checkout.success', compact(
-            'transaction',
-            'categories'
-            ));
-            }
+
+
+
+
+
+        return view(
+            'checkout.success',
+            compact(
+                'transaction',
+                'categories'
+            )
+        );
+
+    }
+
 }

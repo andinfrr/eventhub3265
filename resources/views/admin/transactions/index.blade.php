@@ -27,6 +27,7 @@
 
             </div>
 
+
             <div class="flex gap-3">
 
                 <select
@@ -47,6 +48,7 @@
 
                 </select>
 
+
                 <select
                     name="month"
                     class="px-5 py-3 rounded-xl border border-slate-200 bg-white">
@@ -66,83 +68,101 @@
                 </select>
 
 
-
             </div>
 
         </div>
 
     </div>
 
+
+
     {{-- Table --}}
     <div class="bg-white rounded-[2rem] border border-slate-200 overflow-hidden">
 
+
         {{-- Search --}}
-      <div class="p-6 border-b bg-white">
+        <div class="p-6 border-b bg-white">
 
-    <div class="flex gap-3">
+            <div class="flex gap-3">
 
-        <input
-            type="text"
-            name="search"
-            value="{{ request('search') }}"
-            placeholder="Cari Order ID, Nama Customer, atau Email..."
-            class="flex-1 px-6 py-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input
+                    type="text"
+                    name="search"
+                    value="{{ request('search') }}"
+                    placeholder="Cari Order ID, Nama Customer, atau Email..."
+                    class="flex-1 px-6 py-4 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
 
-        <button
-            type="submit"
-            class="px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">
 
-            Filter
+                <button
+                    type="submit"
+                    class="px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700">
 
-        </button>
+                    Filter
 
-    </div>
+                </button>
 
-</div>
-        
+            </div>
+
+        </div>
+
+
 
         <div class="overflow-x-auto">
 
             <table class="w-full">
 
+
                 <thead>
 
                     <tr class="bg-slate-100 text-slate-500 uppercase text-xs tracking-wider">
+
 
                         <th class="px-8 py-5 text-left">
                             Order ID
                         </th>
 
+
                         <th class="px-8 py-5 text-left">
                             Customer
                         </th>
+
 
                         <th class="px-8 py-5 text-left">
                             Event
                         </th>
 
+
                         <th class="px-8 py-5 text-left">
                             Tanggal
                         </th>
+
 
                         <th class="px-8 py-5 text-left">
                             Status
                         </th>
 
+
                         <th class="px-8 py-5 text-right">
                             Total
                         </th>
+
 
                     </tr>
 
                 </thead>
 
+
+
                 <tbody>
 
-                    @forelse($transactions as $trx)
+
+                @forelse($transactions as $trx)
+
 
                     <tr class="border-t border-slate-100 hover:bg-slate-50 transition">
 
+
+                        {{-- Order ID --}}
                         <td class="px-8 py-6">
 
                             <span
@@ -154,15 +174,20 @@
 
                         </td>
 
+
+
+                        {{-- Customer --}}
                         <td class="px-8 py-6">
 
                             <div class="font-bold text-slate-800">
                                 {{ $trx->customer_name }}
                             </div>
 
+
                             <div class="text-xs text-slate-400 mt-1">
                                 {{ $trx->customer_email }}
                             </div>
+
 
                             <div class="text-xs text-slate-400">
                                 {{ $trx->customer_phone }}
@@ -170,6 +195,9 @@
 
                         </td>
 
+
+
+                        {{-- Event --}}
                         <td class="px-8 py-6">
 
                             <div class="font-medium text-slate-700">
@@ -178,19 +206,34 @@
 
                         </td>
 
+
+
+
+                        {{-- Tanggal --}}
                         <td class="px-8 py-6 text-sm text-slate-500">
+
 
                             {{ $trx->created_at->format('d M Y') }}
 
+
                             <div class="text-xs text-slate-400 mt-1">
+
                                 {{ $trx->created_at->format('H:i') }}
+
                             </div>
+
 
                         </td>
 
+
+
+
+                        {{-- Status --}}
                         <td class="px-8 py-6">
 
-                            @if($trx->status == 'Success')
+
+                            @if(in_array(strtolower($trx->status), ['success','settlement']))
+
 
                                 <span class="inline-flex items-center gap-2 text-green-600 font-bold">
 
@@ -200,7 +243,10 @@
 
                                 </span>
 
-                            @elseif($trx->status == 'Pending')
+
+
+                            @elseif(strtolower($trx->status) == 'pending')
+
 
                                 <span class="inline-flex items-center gap-2 text-orange-500 font-bold">
 
@@ -210,7 +256,10 @@
 
                                 </span>
 
+
+
                             @else
+
 
                                 <span class="inline-flex items-center gap-2 text-slate-500 font-bold">
 
@@ -220,57 +269,89 @@
 
                                 </span>
 
+
+
                             @endif
+
 
                         </td>
 
+
+
+
+
+                        {{-- Total --}}
                         <td class="px-8 py-6 text-right">
+
 
                             <span class="text-lg font-black text-slate-900">
 
-                                Rp {{ number_format($trx->total_price, 0, ',', '.') }}
+                                Rp {{ number_format($trx->total_price,0,',','.') }}
 
                             </span>
 
+
                         </td>
+
+
 
                     </tr>
 
-                    @empty
+
+
+                @empty
+
+
 
                     <tr>
 
+
                         <td colspan="6" class="text-center py-16">
 
+
                             <div class="text-slate-400">
+
 
                                 <p class="font-semibold text-lg">
                                     Belum Ada Transaksi
                                 </p>
 
+
                                 <p class="text-sm mt-2">
                                     Data transaksi akan muncul di sini.
                                 </p>
 
+
                             </div>
+
 
                         </td>
 
+
                     </tr>
 
-                    @endforelse
+
+
+                @endforelse
+
+
 
                 </tbody>
 
+
             </table>
+
 
         </div>
 
+
     </div>
+
 
 </form>
 
 
 </main>
+
 
 @endsection

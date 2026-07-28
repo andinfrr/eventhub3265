@@ -18,7 +18,7 @@ use App\Http\Controllers\Admin\PengurusController;
 use App\Http\Controllers\Admin\CouponController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Auth\RegisterOrganizationController;
-
+use App\Http\Controllers\CertificateController;
 
 
 Route::get('/login', function () {
@@ -153,10 +153,9 @@ Route::prefix('admin')
     // PENGURUS CRUD
     Route::resource('pengurus', PengurusController::class);
 
-    // ORGANIZATION & EVENT APPROVAL (khusus Super Admin)
+    // ORGANIZATION & EVENT APPROVAL (Super Admin)
     Route::middleware('superadmin')->group(function () {
 
-        // ORGANIZATION
         Route::get('/organizations', [OrganizationController::class, 'index'])
             ->name('organizations.index');
 
@@ -166,7 +165,6 @@ Route::prefix('admin')
         Route::patch('/organizations/{id}/reject', [OrganizationController::class, 'reject'])
             ->name('organizations.reject');
 
-        // EVENT APPROVAL
         Route::get('/event-approval', [AdminEventController::class, 'approval'])
             ->name('admin.events.approval');
 
@@ -176,11 +174,9 @@ Route::prefix('admin')
         Route::patch('/event-approval/{id}/reject', [AdminEventController::class, 'reject'])
             ->name('admin.events.reject');
 
-        // COUPON CRUD
         Route::resource('coupons', CouponController::class);
     });
 });
-
 // PAYMENT MIDTRANS
 Route::get('/payment/{order_id}', [\App\Http\Controllers\CheckoutController::class, 'payment'])->name('checkout.payment');
 
@@ -196,3 +192,11 @@ Route::get('/auth/google/callback', [AuthController::class, 'googleCallback'])
     Route::post('/logout', [AuthController::class, 'logout'])
     ->name('logout');
     
+    // USER DOWNLOAD CERTIFICATE
+Route::middleware('auth')->group(function () {
+
+    Route::get('/certificate/{transaction}', 
+        [CertificateController::class, 'generate'])
+        ->name('certificate.generate');
+
+});
