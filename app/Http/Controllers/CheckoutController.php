@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CertificateMail;
+use App\Models\Certificate;
 
 class CheckoutController extends Controller
 {
@@ -131,10 +132,11 @@ class CheckoutController extends Controller
 
 
 
-        $totalPrice = session(
-            'final_price',
-            $event->price + 5000
-        );
+        if ($event->price == 0) {
+            $totalPrice = 0;
+        } else {
+            $totalPrice = $event->price + 5000;
+        }
 
 
 
@@ -160,8 +162,68 @@ class CheckoutController extends Controller
 
         ]);
 
+// =========================
+// BYPASS EVENT GRATIS
+// =========================
+if ($event->price == 0) {
 
+    // ubah status transaksi menjadi success
+    $transaction->update([
+        'status' => 'success'
+    ]);
 
+    Certificate::create([
+
+    'transaction_id'      => $transaction->id,
+    'event_id'            => $event->id,
+    'certificate_number'  => 'CERT-' . strtoupper(Str::random(10)),
+    'participant_name'    => $transaction->customer_name,
+    'participant_email'   => $transaction->customer_email,
+    'generated_at'        => now(),
+
+    ]);
+
+    // kurangi stok
+    if ($event->stock > 0) {
+        $event->decrement('stock');
+    }
+
+    // tambah penggunaan voucher
+    if ($transaction->coupon_code) {
+        Coupon::where('code', $transaction->coupon_code)
+            ->increment('used');
+    }
+
+    // kirim e-certificate
+    try {
+        Mail::to($transaction->customer_email)
+            ->send(new CertificateMail($transaction));
+    } catch (\Exception $e) {
+        Log::error($e->getMessage());
+    }
+
+    // kirim e-ticket
+    try {
+        Mail::to($transaction->customer_email)
+            ->send(new \App\Mail\EventTicketMail($transaction));
+    } catch (\Exception $e) {
+        Log::error($e->getMessage());
+    }
+
+    // hapus session voucher
+    session()->forget([
+        'coupon_id',
+        'coupon_code',
+        'discount_amount',
+        'final_price'
+    ]);
+
+    // langsung ke halaman sukses
+    return redirect()->route(
+        'checkout.success',
+        $transaction->order_id
+    );
+}
 
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
 
@@ -291,7 +353,18 @@ class CheckoutController extends Controller
             ->where('order_id', $order_id)
             ->firstOrFail();
 
+// Jika transaksi gratis, tidak perlu cek Midtrans
+if ($transaction->total_price == 0) {
 
+    return view(
+        'checkout.success',
+        compact(
+            'transaction',
+            'categories'
+        )
+    );
+
+}
 
 
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');

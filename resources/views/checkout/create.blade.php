@@ -39,10 +39,16 @@
                      <span>Harga Tiket</span>
                      <span>Rp {{ number_format($event->price, 0, ',', '.') }}</span>
                  </div>
-                 <div class="flex justify-between text-slate-500">
-                     <span>Biaya Layanan</span>
-                     <span>Rp 5.000</span>
-                 </div>
+                    <div class="flex justify-between text-slate-500">
+                        <span>Biaya Layanan</span>
+                        <span>
+                            @if($event->price == 0)
+                                Rp 0
+                            @else
+                                Rp 5.000
+                            @endif
+                        </span>
+                    </div>
                 <hr>
                 <form
                     action="{{ route('checkout.applyCoupon', $event->id) }}"
@@ -95,10 +101,14 @@
                 </div>
 
                 @endif
-                <div class="flex justify-between text-2xl font-black mt-4 pt-4 border-t">
+              <div class="flex justify-between text-2xl font-black mt-4 pt-4 border-t">
                     <span>Total Bayar</span>
                     <span class="text-indigo-600">
-                        Rp {{ number_format(session('final_price', $event->price + 5000),0,',','.') }}
+                        @if($event->price == 0)
+                            Rp 0
+                        @else
+                            Rp {{ number_format(session('final_price', $event->price + 5000), 0, ',', '.') }}
+                        @endif
                     </span>
                 </div>
              </div>
