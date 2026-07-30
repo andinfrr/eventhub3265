@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CertificateMail;
 use App\Models\Certificate;
+use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
@@ -20,7 +21,7 @@ class CheckoutController extends Controller
     {
         $categories = Category::all();
 
-        $user = auth()->user();
+        $user = Auth::user();
 
         return view('checkout.create', compact(
             'event',
@@ -128,39 +129,28 @@ class CheckoutController extends Controller
 
 
 
-        $orderId = 'TRX-' . time() . '-' . Str::random(5);
+$orderId = 'TRX-' . time() . '-' . Str::random(5);
 
+// gunakan harga setelah voucher jika ada
+if ($event->price == 0) {
+    $totalPrice = 0;
+} else {
+    $totalPrice = session('final_price', $event->price + 5000);
+}
 
+$transaction = Transaction::create([
+    'organization_id' => $event->organization_id,
+    'event_id' => $event->id,
+    'order_id' => $orderId,
+    'customer_name' => $request->customer_name,
+    'customer_email' => $request->customer_email,
+    'customer_phone' => $request->customer_phone,
+    'total_price' => $totalPrice,
+    'status' => 'pending',
 
-        if ($event->price == 0) {
-            $totalPrice = 0;
-        } else {
-            $totalPrice = $event->price + 5000;
-        }
-
-
-
-        $transaction = Transaction::create([
-
-            'organization_id' => $event->organization_id,
-
-            'event_id' => $event->id,
-
-            'order_id' => $orderId,
-
-            'customer_name' => $request->customer_name,
-
-            'customer_email' => $request->customer_email,
-
-            'customer_phone' => $request->customer_phone,
-
-            'total_price' => $totalPrice,
-
-            'status' => 'pending',
-
-            'coupon_code' => session('coupon_code'),
-
-        ]);
+    'coupon_code' => session('coupon_code'),
+    'discount_amount' => session('discount_amount', 0),
+]);
 
 // =========================
 // BYPASS EVENT GRATIS
@@ -269,32 +259,14 @@ if ($event->price == 0) {
 
 
 
-            $transaction->update([
+        $transaction->update([
+            'snap_token' => $snapToken
+        ]);
 
-                'snap_token' => $snapToken
-
-            ]);
-
-
-
-            session()->forget([
-
-                'coupon_id',
-
-                'coupon_code',
-
-                'discount_amount',
-
-                'final_price'
-
-            ]);
-
-
-
-            return redirect()->route(
-                'checkout.payment',
-                $transaction->order_id
-            );
+        return redirect()->route(
+            'checkout.payment',
+            $transaction->order_id
+        );
 
 
 
@@ -356,13 +328,20 @@ if ($event->price == 0) {
 // Jika transaksi gratis, tidak perlu cek Midtrans
 if ($transaction->total_price == 0) {
 
-    return view(
-        'checkout.success',
-        compact(
-            'transaction',
-            'categories'
-        )
-    );
+session()->forget([
+    'coupon_id',
+    'coupon_code',
+    'discount_amount',
+    'final_price'
+]);
+
+return view(
+    'checkout.success',
+    compact(
+        'transaction',
+        'categories'
+    )
+);
 
 }
 

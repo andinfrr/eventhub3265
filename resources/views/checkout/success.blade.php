@@ -87,19 +87,50 @@
 
             </div>
 
-            <div class="flex justify-between">
+            <div class="space-y-3 pt-2">
 
-                <span class="text-slate-500">
-                    Total Pembayaran
-                </span>
+    <div class="flex justify-between">
+        <span class="text-slate-500">Harga Tiket</span>
+        <span>
+            Rp {{ number_format($transaction->event->price,0,',','.') }}
+        </span>
+    </div>
 
-                <span class="font-bold text-indigo-600">
+    @if($transaction->event->price != 0)
+    <div class="flex justify-between">
+        <span class="text-slate-500">Biaya Layanan</span>
+        <span>Rp 5.000</span>
+    </div>
+    @endif
 
-                    Rp {{ number_format($transaction->total_price,0,',','.') }}
+    @if(session('discount_amount'))
+    <div class="flex justify-between text-green-600 font-semibold">
+        <span>Voucher ({{ session('coupon_code') }})</span>
+        <span>
+            - Rp {{ number_format(session('discount_amount'),0,',','.') }}
+        </span>
+    </div>
+    @endif
 
-                </span>
+    <hr>
 
-            </div>
+    <div class="flex justify-between">
+        <span class="font-bold text-slate-700">
+            Total Pembayaran
+        </span>
+
+        <span class="font-bold text-indigo-600 text-lg">
+
+            @if($transaction->event->price == 0)
+                Rp 0
+            @else
+                Rp {{ number_format(session('final_price', $transaction->event->price + 5000),0,',','.') }}
+            @endif
+
+        </span>
+    </div>
+
+</div>
 
         </div>
 

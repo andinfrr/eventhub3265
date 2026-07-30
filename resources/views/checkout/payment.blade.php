@@ -12,10 +12,38 @@
          <h2 class="text-2xl font-black mb-2">Selesaikan Pembayaran</h2>
          <p class="text-slate-500 mb-8">Mohon selesaikan pembayaran tiket Anda untuk event <strong>{{ $transaction->event->title }}</strong>.</p>
          
-         <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-8">
-             <p class="text-sm text-slate-400 font-bold uppercase tracking-wider mb-1">Total Tagihan</p>
-             <h3 class="text-4xl font-extrabold text-indigo-600">Rp {{ number_format($transaction->total_price, 0, ',', '.') }}</h3>
-             <p class="text-xs text-slate-400 mt-2">Order ID: {{ $transaction->order_id }}</p>
+<div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-8">
+
+    <p class="text-sm text-slate-400 font-bold uppercase tracking-wider mb-4">
+        Rincian Pembayaran
+    </p>
+
+    {{-- Voucher --}}
+    @if($transaction->discount_amount > 0)
+    <div class="flex justify-between mb-2 text-green-600 font-semibold">
+        <span>Voucher ({{ $transaction->coupon_code }})</span>
+        <span>
+            - Rp {{ number_format($transaction->discount_amount, 0, ',', '.') }}
+        </span>
+    </div>
+    @endif
+
+    <hr class="my-4">
+
+    {{-- Total --}}
+    <div class="flex justify-between items-center">
+        <span class="text-xl font-black">Total Bayar</span>
+
+        <span class="text-3xl font-extrabold text-indigo-600">
+            Rp {{ number_format($transaction->total_price, 0, ',', '.') }}
+        </span>
+    </div>
+
+    <p class="text-xs text-slate-400 mt-4">
+        Order ID: {{ $transaction->order_id }}
+    </p>
+
+</div>
          </div>
 
          <button id="pay-button" class="w-full py-5 bg-indigo-600 text-white rounded-2xl font-black text-xl shadow-xl shadow-indigo-200 hover:bg-indigo-700 transition animate-bounce-in">
